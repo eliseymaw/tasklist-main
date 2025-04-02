@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать профиль</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+</head>
+<body>
+    <!-- Кнопка для открытия сайдбара -->
+    <button class="toggle-sidebar-btn">&#9776;</button>
+
+    <!-- Модальное окно с сайдбаром -->
+    <div class="sidebar-modal">
+        <div class="sidebar">
+            <button class="close-btn">&times;</button>
+            <ul>
+                <li><a href="{% url 'tasks' %}">Задачи</a></li>
+                <li><a href="{% url 'user_profile' user.username %}">Профиль</a></li>
+                <li><a href="{% url 'edit_profile' user.id %}">Редактировать профиль</a></li>
+                <li><a href="{% url 'logout' %}" class="btn logout-btn">Выйти</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="content">
+        <header>
+            <h1>Редактировать профиль</h1>
+        </header>
+
+        <!-- Форма редактирования профиля -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="profile-section">
+                <div class="profile-avatar">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar">
+                    {% else %}
+                        <div class="avatar-placeholder">Нет фото</div>
+                    {% endif %}
+                </div>
+                <div class="profile-info">
+                    <label for="avatar">Фото профиля:</label>
+                    <input type="file" id="avatar" name="avatar" accept="image/*">
+
+                    <label for="username">Имя пользователя:</label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}">
+
+                    <button type="submit" class="btn">Сохранить изменения</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="{% static 'script.js' %}"></script> <!-- Подключение вашего скрипта -->
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{% static 'mainpage/renew.js' %}"></script>
+    <title>Задачи</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h1>Список задач</h1>
+    
+    <div class="button-container">
+        <a href="{% url 'create_task' %}" class="button">Добавить задачу</a>
+        <a href="{% url 'tasks' %}" class="button">Посмотреть задачи</a>
+    </div>
+    
+    <h2>Текущие задачи</h2>
+    <ul>
+        {% for task in tasks %}
+            <li class="task {% if task.done %}completed{% elif task.deadline and task.deadline < today %}overdue{% else %}pending{% endif %}">
+                {{ task.title }} - {{ task.description }} (Дедлайн: {{ task.deadline }})
+            </li>
+        {% empty %}
+            <p>Задач нет.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>

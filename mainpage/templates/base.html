@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tasklist{% endblock %}</title>
+    {% load static %}
+    
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    
+    <!-- Подключение иконки favicon -->
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+
+    <!-- Подключение FontAwesome через CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            overflow-x: hidden;
+            padding-bottom: 60px; /* Добавляем отступ, чтобы контент не перекрывал footer */
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center; /* Центрируем заголовок */
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            flex-grow: 1; /* Заголовок будет занимать всю доступную ширину */
+        }
+
+        .toggle-btn {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-size: 20px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-btn:hover {
+            background: #666;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px; /* Изменяем, чтобы меню было скрыто */
+            width: 150px; /* Ширина меню */
+            height: 100%;
+            background: #333;
+            color: white;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between; /* Выравнивание текста и иконок */
+            align-items: center;
+        }
+
+        .sidebar a i {
+            margin-left: 10px;
+            /* Иконки будут видимыми */
+        }
+
+        .sidebar a:hover {
+            background: #444;
+        }
+
+        .content {
+            margin-left: 0;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.open + .content {
+            margin-left: 250px; /* Ширина контента изменена при открытии */
+        }
+
+        .task-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .task-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .task-card p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .task-card .status {
+            color: #888;
+        }
+
+        .task-card .due-date {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            background: #333;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Tasklist</h1>
+        <button class="toggle-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+    </header>
+
+    <div class="sidebar" id="sidebar">
+        <a href="{% url 'base' %}">Главная <i class="fas fa-home"></i></a>
+        <a href="{% url 'task_list_main' %}">Задачи <i class="fas fa-tasks"></i></a>
+        <a href="{% url 'user_profile' user.username %}">Профиль <i class="fas fa-user"></i></a>
+        <a href="{% url 'logout' %}">Выход <i class="fas fa-sign-out-alt"></i></a>
+    </div>
+
+    <div class="content" id="content">
+        <h2>Задачи</h2>
+        <div class="task-list">
+            {% for task in tasks %}
+            <div class="task-card">
+                <h3>{{ task.title }}</h3>
+                <p>{{ task.description|truncatewords:20 }}</p>
+                <p class="status">Статус: {{ task.status }}</p>
+                <p class="due-date">Дата: {{ task.due_date }}</p>
+                <a href="{% url 'edit_task' task.id %}">Редактировать</a>
+                <i class="fas fa-check-circle"></i> <!-- Иконка для задачи -->
+            </div>
+            {% empty %}
+            <p>Задачи отсутствуют.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Tasklist. Все права защищены.</p>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menu-btn');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('open');
+            content.classList.toggle('open');
+
+            if (sidebar.classList.contains('open')) {
+                menuBtn.textContent = '✖';
+            } else {
+                menuBtn.textContent = '☰';
+            }
+        }
+    </script>
+</body>
+</html>

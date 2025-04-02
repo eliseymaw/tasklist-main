@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль {{ user.username }}</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="{% static 'script.js' %}" defer></script>
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <h1 class="logo">Tasklist</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{% url 'task_list_main' %}">Задачи</a></li>
+                    <li><a href="{% url 'logout' %}" class="btn logout-btn">Выйти</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container profile-container">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Аватар пользователя {{ user.username }}" class="avatar">
+                {% else %}
+                    <div class="avatar-placeholder">Аватар отсутствует</div>
+                {% endif %}
+            </div>
+
+            <div class="profile-info">
+                <h2 class="username">{{ user.username }}</h2>
+                <p class="status">{{ user.profile.status|default:"Статус не установлен" }}</p>
+                <p><strong>Описание:</strong> {{ user.profile.bio|default:"Нет описания" }}</p>
+                <p><strong>Местоположение:</strong> {{ user.profile.location|default:"Не указано" }}</p>
+            </div>
+
+            {% if user == request.user %}
+                <button id="openEditProfileBtn" class="btn btn-edit-profile">Редактировать профиль</button>
+            {% endif %}
+        </div>
+
+        <div class="profile-details">
+            <h3>Социальные сети</h3>
+            <ul class="social-links">
+                <li><a href="{{ user.profile.twitter|default:'#' }}" class="social-btn twitter-btn">Twitter</a></li>
+                <li><a href="{{ user.profile.linkedin|default:'#' }}" class="social-btn linkedin-btn">LinkedIn</a></li>
+                <li><a href="{{ user.profile.github|default:'#' }}" class="social-btn github-btn">GitHub</a></li>
+            </ul>
+
+            <h3>Интересы</h3>
+            <p>{{ user.profile.interests|default:"Нет интересов" }}</p>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования профиля -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" id="closeEditProfileBtn">&times;</span>
+        <h2>Редактировать профиль</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div>
+                <label for="username">Имя пользователя:</label>
+                <input type="text" name="username" id="username" value="{{ user.username }}">
+            </div>
+            <div>
+                <label for="email">Электронная почта:</label>
+                <input type="email" name="email" id="email" value="{{ user.email }}">
+            </div>
+            <div>
+                <label for="bio">Описание:</label>
+                <textarea name="bio" id="bio">{{ user.profile.bio }}</textarea>
+            </div>
+            <div>
+                <label for="location">Местоположение:</label>
+                <input type="text" name="location" id="location" value="{{ user.profile.location }}">
+            </div>
+            <div>
+                <label for="avatar">Аватар:</label>
+                <input type="file" name="avatar" id="avatar">
+            </div>
+
+            <!-- Кнопки для статуса -->
+            <div>
+                <label for="status">Статус:</label>
+                <div class="status-buttons">
+                    <button type="button" class="status-btn online" onclick="setStatus('В сети')">В сети</button>
+                    <button type="button" class="status-btn offline" onclick="setStatus('Не в сети')">Не в сети</button>
+                    <button type="button" class="status-btn invisible" onclick="setStatus('Невидимка')">Невидимка</button>
+                </div>
+            </div>
+
+            <!-- Отображение текущего статуса -->
+            <div>
+                <label for="current_status">Текущий статус:</label>
+                <input type="text" id="current_status" name="current_status" value="{{ user.profile.status }}" readonly>
+            </div>
+
+            <button type="submit" class="btn">Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+
+    <footer>
+        <p>&copy; 2025 Tasklist. Все права защищены.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать задачу</title>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: #333;
+            padding: 10px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .toggle-btn {
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 20px;
+            transition: background 0.3s;
+        }
+
+        .toggle-btn:hover {
+            background: #666;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px; /* скрытие меню */
+            width: 200px;
+            height: 100%;
+            background: #222;
+            color: white;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 999;
+        }
+
+        .sidebar.open {
+            left: 0; /* Открытие меню */
+        }
+
+        .sidebar a {
+            color: white;
+            padding: 12px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar a i {
+            margin-left: 10px;
+        }
+
+        .sidebar a:hover {
+            background: #444;
+        }
+
+        .content {
+            margin-left: 0;
+            padding: 80px 20px 20px 20px; /* Отступ сверху для хедера */
+            transition: margin-left 0.3s ease;
+            flex-grow: 1;
+        }
+
+        .sidebar.open + .content {
+            margin-left: 200px; /* смещение контента при открытии бокового меню */
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        #map {
+            height: 300px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Создание задачи</h1>
+        <button class="toggle-btn" id="menu-btn" onclick="toggleSidebar()">☰</button>
+    </header>
+
+    <div class="sidebar" id="sidebar">
+        <a href="{% url 'base' %}">Главная <i class="fas fa-home"></i></a>
+        <a href="{% url 'task_list_main' %}">Задачи <i class="fas fa-tasks"></i></a>
+        <a href="{% url 'user_profile' user.username %}">Профиль <i class="fas fa-user"></i></a>
+        <a href="{% url 'logout' %}">Выход <i class="fas fa-sign-out-alt"></i></a>
+    </div>
+
+    <div class="content" id="content">
+        <div class="form-container">
+            <form method="POST" action="{% url 'create_task' %}">
+                {% csrf_token %}
+                
+                <label for="title">Название:</label>
+                {{ form.title }}
+
+                <label for="description">Описание:</label>
+                {{ form.description }}
+
+                <label for="date_start">Начало:</label>
+                {{ form.date_start }}
+
+                <label for="deadline">Дедлайн:</label>
+                {{ form.deadline }}
+
+                <label for="repeat_type">Тип повторения:</label>
+                {{ form.repeat_type }}
+
+                <label for="repeat_i">Повторений:</label>
+                {{ form.repeat_i }}
+
+                <label>Выберите точку на карте:</label>
+                <div id="map"></div>
+
+                <label for="lat">Широта:</label>
+                {{ geop_form.lat }}
+
+                <label for="lon">Долгота:</label>
+                {{ geop_form.lon }}
+
+                <button type="submit">Создать</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Tasklist. Все права защищены.</p>
+    </footer>
+
+    <script>
+        var map = L.map('map').setView([55.751244, 37.618423], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var marker;
+        map.on('click', function(e) {
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+            document.getElementById('id_lat').value = e.latlng.lat;
+            document.getElementById('id_lon').value = e.latlng.lng;
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const menuBtn = document.getElementById('menu-btn');
+            const content = document.getElementById('content');
+            sidebar.classList.toggle('open');
+            content.classList.toggle('open');
+
+            if (sidebar.classList.contains('open')) {
+                menuBtn.textContent = '✖';
+            } else {
+                menuBtn.textContent = '☰';
+            }
+        }
+    </script>
+</body>
+</html>

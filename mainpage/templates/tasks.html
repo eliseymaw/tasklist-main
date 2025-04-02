@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список задач</title>
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    
+    <!-- Подключаем Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            margin: 20px 0;
+            border: 2px solid #333;
+        }
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+        .task-item {
+            background: #f4f4f4;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Список задач</h1>
+        <a href="{% url 'create_task' %}">
+            <button>Добавить задачу</button>
+        </a>
+    </header>
+
+    <!-- Карта -->
+    <div id="map"></div>
+
+    <!-- Список задач -->
+    <ul class="task-list">
+        {% for task in tasks %}
+            <li class="task-item">
+                <h3>{{ task.title }}</h3>
+                <p>{{ task.description }}</p>
+                <p><strong>Начало:</strong> {{ task.date_start }}</p>
+                <p><strong>Окончание:</strong> {{ task.deadline }}</p>
+                <p><strong>Повторение:</strong> {{ task.repeat_type }} ({{ task.repeat_i }} раз)</p>
+                <p><strong>Геопозиция:</strong> {{ task.geop.lat }}, {{ task.geop.lon }}</p>
+                <a href="{% url 'edit_task' task.id %}">
+                    <button>Редактировать</button>
+                </a>
+                <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Удалить</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- JSON-скрипт для передачи данных в JS -->
+    <script type="application/json" id="tasks-data">
+        {{ tasks_json|safe }}
+    </script>
+
+    <!-- JavaScript для карты -->
+    <script>
+        var map = L.map('map').setView([55.751244, 37.618423], 5); // Москва, как центр карты
+
+        // Подключаем OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Получаем JSON-данные из скрытого тега
+        var tasks = JSON.parse(document.getElementById('tasks-data').textContent);
+
+        // Добавляем маркеры на карту
+        tasks.forEach(function(task) {
+            if (task.geop.lat && task.geop.lon) {
+                L.marker([task.geop.lon, task.geop.lat])
+                    .addTo(map)
+                    .bindPopup("<b>" + task.title + "</b><br>" + task.description);
+            }
+        });
+    </script>
+
+<h1>Список задач</h1>
+<ul>
+    {% for task in tasks %}
+    <li>
+        <h3>{{ task.title }}</h3>
+        <p>{{ task.description }}</p>
+        <p>Начало: {{ task.date_start }}</p>
+        <p>Окончание: {{ task.deadline }}</p>
+        <p>Тип повторения: {{ task.repeat_type }}</p>
+        <p>Количество повторений: {{ task.repeat_i }}</p>
+        <p>Геопозиция: <span id={{task.id}} class="geop">{{ task.geop.lat }}, {{ task.geop.lon }}</span></p>
+    </li>
+    {% endfor %}
+</ul>
+</body>
+</html>

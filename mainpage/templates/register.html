@@ -1,0 +1,111 @@
+{% block content %}
+<div class="auth-container">
+    <h2>Регистрация</h2>
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn-primary">Зарегистрироваться</button>
+    </form>
+    <p>Уже есть аккаунт? <a href="{% url 'login' %}" class="auth-link">Войти</a></p>
+</div>
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #f4f7fb, #dfe7fd);
+        overflow: hidden;
+    }
+
+    .auth-container {
+        max-width: 400px;
+        padding: 20px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        animation: fadeIn 0.5s ease-in-out;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .auth-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .auth-container h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .auth-form input {
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .auth-form input:focus {
+        box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    .btn-primary {
+        background: #444;
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #666;
+        transform: scale(1.05);
+    }
+
+    .auth-link {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    .auth-link:hover {
+        color: #0056b3;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("mousemove", (event) => {
+        const authContainer = document.querySelector(".auth-container");
+        const { clientX: x, clientY: y } = event;
+        const { innerWidth: width, innerHeight: height } = window;
+        const moveX = (x / width - 0.5) * 10;
+        const moveY = (y / height - 0.5) * 10;
+        authContainer.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- edit_task.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать задачу</title>
+</head>
+<body>
+    <header>
+        <h1>Редактировать задачу: {{ task.title }}</h1>
+    </header>
+    
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Сохранить изменения</button>
+    </form>
+
+    <!-- Кнопка для удаления задачи -->
+    <form method="POST" action="{% url 'delete_task' task.id %}">
+        {% csrf_token %}
+        <button type="submit" style="background-color: red; color: white;">Удалить задачу</button>
+    </form>
+    
+    <footer>
+        <p>© 2025 Task Manager. Все права защищены.</p>
+    </footer>
+</body>
+</html>
