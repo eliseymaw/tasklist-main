@@ -22,6 +22,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
         header {
@@ -55,6 +56,59 @@
 
         header button:hover {
             background-color: #45a049;
+        }
+
+        /* Стили для сайдбара */
+        #sidebar {
+            width: 250px;
+            height: 100%;
+            position: fixed;
+            left: -250px;
+            top: 0;
+            background-color: #333;
+            color: white;
+            transition: left 0.3s ease;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #sidebar.open {
+            left: 0;
+        }
+
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #sidebar ul li {
+            margin: 20px 0;
+        }
+
+        #sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: block;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        #sidebar ul li a:hover {
+            background-color: #444;
+        }
+
+        /* Стили для контента */
+        #content {
+            flex-grow: 1;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        #sidebar.open + #content {
+            margin-left: 250px;
         }
 
         #map {
@@ -147,62 +201,84 @@
 <body>
     <header>
         <h1>Список задач</h1>
+        <button id="menu-btn" onclick="toggleSidebar()">☰</button>
         <a href="{% url 'create_task' %}">
             <button>Добавить задачу</button>
         </a>
     </header>
 
-    <!-- Карта -->
-    <div id="map"></div>
+    <!-- Сайдбар -->
+    <div id="sidebar">
+        <ul>
+            <li><a href="{% url 'task_list_main' %}">Задачи</a></li>
+            <li><a href="{% url 'user_profile' user.username %}">Профиль</a></li>
+            <li><a href="{% url 'logout' %}">Выход</a></li>
+        </ul>
+    </div>
 
-    <!-- Список задач -->
-    <ul class="task-list">
-        {% for task in tasks %}
-        <li class="task-item">
-            <h3>{{ task.title }}</h3>
-            <p>{{ task.description }}</p>
-            <p><strong>Начало:</strong> {{ task.date_start }}</p>
-            <p><strong>Окончание:</strong> {{ task.deadline }}</p>
-            <p><strong>Повторение:</strong> {{ task.repeat_type }} ({{ task.repeat_i }} раз)</p>
-            <p><strong>Геопозиция:</strong> {{ task.geop.lat }}, {{ task.geop.lon }}</p>
-            <a href="{% url 'edit_task' task.id %}">
-                <button>Редактировать</button>
-            </a>
-            <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit">Удалить</button>
-            </form>
-        </li>
-        {% endfor %}
-    </ul>
+    <!-- Контент -->
+    <div id="content">
+        <!-- Карта -->
+        <div id="map"></div>
 
-    <!-- JSON-скрипт для передачи данных в JS -->
-    <script type="application/json" id="tasks-data">
-        {{ tasks_json|safe }}
-    </script>
+        <!-- Список задач -->
+        <ul class="task-list">
+            {% for task in tasks %}
+            <li class="task-item">
+                <h3>{{ task.title }}</h3>
+                <p>{{ task.description }}</p>
+                <p><strong>Начало:</strong> {{ task.date_start }}</p>
+                <p><strong>Окончание:</strong> {{ task.deadline }}</p>
+                <p><strong>Повторение:</strong> {{ task.repeat_type }} ({{ task.repeat_i }} раз)</p>
+                <p><strong>Геопозиция:</strong> {{ task.geop.lat }}, {{ task.geop.lon }}</p>
+                <a href="{% url 'edit_task' task.id %}">
+                    <button>Редактировать</button>
+                </a>
+                <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit">Удалить</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
 
-    <!-- JavaScript для карты -->
-    <script>
-        var map = L.map('map').setView([55.751244, 37.618423], 5); // Москва, как центр карты
+        <!-- JSON-скрипт для передачи данных в JS -->
+        <script type="application/json" id="tasks-data">
+            {{ tasks_json|safe }}
+        </script>
 
-        // Подключаем OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        <!-- JavaScript для карты -->
+        <script>
+            var map = L.map('map').setView([55.751244, 37.618423], 5); // Москва, как центр карты
 
-        // Получаем JSON-данные из скрытого тега
-        var tasks = JSON.parse(document.getElementById('tasks-data').textContent);
+            // Подключаем OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-        // Добавляем маркеры на карту
-        tasks.forEach(function (task) {
-            if (task.geop.lat && task.geop.lon) {
-                L.marker([task.geop.lon, task.geop.lat])
-                    .addTo(map)
-                    .bindPopup("<b>" + task.title + "</b><br>" + task.description);
+            // Получаем JSON-данные из скрытого тега
+            var tasks = JSON.parse(document.getElementById('tasks-data').textContent);
+
+            // Добавляем маркеры на карту
+            tasks.forEach(function (task) {
+                if (task.geop && task.geop.lat && task.geop.lon) {
+                    L.marker([task.geop.lat, task.geop.lon])
+                        .addTo(map)
+                        .bindPopup("<b>" + task.title + "</b><br>" + task.description);
+                }
+            });
+        </script>
+
+        <!-- Скрипт для работы с сайдбаром -->
+        <script>
+            function toggleSidebar() {
+                var sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('open');
+                var content = document.getElementById('content');
+                content.classList.toggle('open');
             }
-        });
-    </script>
-
+        </script>
+    </div>
 </body>
 
 </html>

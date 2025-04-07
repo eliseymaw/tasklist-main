@@ -22,7 +22,7 @@
             min-height: 100vh;
             overflow-x: hidden;
         }
-    
+
         header {
             background-color: #333;
             padding: 10px 20px;
@@ -36,12 +36,12 @@
             z-index: 1000;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
-    
+
         header h1 {
             margin: 0;
             font-size: 22px;
         }
-    
+
         .toggle-btn {
             background: #444;
             color: white;
@@ -52,16 +52,16 @@
             font-size: 20px;
             transition: background 0.3s;
         }
-    
+
         .toggle-btn:hover {
             background: #555;
         }
-    
+
         .sidebar {
             position: fixed;
             top: 0;
-            left: -250px;
-            width: 200px;
+            left: -250px; /* Изначально скрываем */
+            width: 250px;
             height: 100%;
             background: #222;
             color: white;
@@ -73,11 +73,11 @@
             gap: 20px;
             z-index: 999;
         }
-    
+
         .sidebar.open {
-            left: 0;
+            left: 0; /* Позиционируем панель на экране */
         }
-    
+
         .sidebar a {
             color: white;
             padding: 12px;
@@ -86,22 +86,22 @@
             transition: background 0.3s;
             font-size: 16px;
         }
-    
+
         .sidebar a:hover {
             background: #444;
         }
-    
+
         .content {
             margin-left: 0;
             padding: 80px 20px 20px 20px;
             transition: margin-left 0.3s ease;
             flex-grow: 1;
         }
-    
+
         .sidebar.open + .content {
-            margin-left: 200px;
+            margin-left: 250px; /* Сдвигаем контент вправо, когда меню открыто */
         }
-    
+
         .form-container {
             max-width: 600px;
             margin: auto;
@@ -110,13 +110,13 @@
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
-    
+
         label {
             display: block;
             margin-top: 15px;
             font-weight: 500;
         }
-    
+
         input, select, textarea {
             width: 100%;
             padding: 10px;
@@ -127,7 +127,7 @@
             font-size: 14px;
             background-color: #fff;
         }
-    
+
         button[type="submit"] {
             margin-top: 20px;
             background-color: #4CAF50;
@@ -139,11 +139,11 @@
             cursor: pointer;
             transition: background 0.3s ease;
         }
-    
+
         button[type="submit"]:hover {
             background-color: #45a049;
         }
-    
+
         #map {
             height: 300px;
             width: 100%;
@@ -151,7 +151,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
-    
+
         footer {
             background-color: #333;
             color: white;
@@ -159,16 +159,16 @@
             text-align: center;
             margin-top: auto;
         }
-    
+
         @media (max-width: 600px) {
             .form-container {
                 padding: 20px;
             }
-    
+
             header h1 {
                 font-size: 18px;
             }
-    
+
             .toggle-btn {
                 font-size: 18px;
                 padding: 8px 12px;
