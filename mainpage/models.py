@@ -31,7 +31,7 @@ class Task(models.Model):
     )
     title = models.CharField(max_length=128)
     description = models.TextField(max_length=2048)
-    geop = models.ForeignKey(Geoposition, on_delete=models.CASCADE)
+    geop = models.ForeignKey(Geoposition, on_delete=models.CASCADE, null=True, blank=True)  # Исправлено
     date_start = models.DateTimeField()
     deadline = models.DateTimeField()
     repeat_type = models.CharField(max_length=10, choices=PERIODS, default="d")

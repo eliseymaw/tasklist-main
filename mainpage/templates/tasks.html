@@ -1,36 +1,149 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Список задач</title>
-    
+
     {% load static %}
     <link rel="stylesheet" href="{% static 'style.css' %}">
-    
+
     <!-- Подключаем Leaflet.js -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fb;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #333;
+            padding: 15px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        header button:hover {
+            background-color: #45a049;
+        }
+
         #map {
             height: 400px;
             width: 100%;
             margin: 20px 0;
-            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: none;
         }
+
         .task-list {
             list-style: none;
-            padding: 0;
+            padding: 0 20px 40px 20px;
+            max-width: 900px;
+            margin: auto;
+            width: 100%;
         }
+
         .task-item {
-            background: #f4f4f4;
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 5px;
+            background: white;
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s;
+        }
+
+        .task-item:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .task-item h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .task-item p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .task-item a button,
+        .task-item form button {
+            background-color: #1976D2;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            margin-top: 10px;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .task-item form button {
+            background-color: #D32F2F;
+        }
+
+        .task-item a button:hover {
+            background-color: #1565C0;
+        }
+
+        .task-item form button:hover {
+            background-color: #B71C1C;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 18px;
+            }
+
+            header button {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .task-item {
+                padding: 15px;
+            }
+
+            .task-item p {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Список задач</h1>
@@ -45,21 +158,21 @@
     <!-- Список задач -->
     <ul class="task-list">
         {% for task in tasks %}
-            <li class="task-item">
-                <h3>{{ task.title }}</h3>
-                <p>{{ task.description }}</p>
-                <p><strong>Начало:</strong> {{ task.date_start }}</p>
-                <p><strong>Окончание:</strong> {{ task.deadline }}</p>
-                <p><strong>Повторение:</strong> {{ task.repeat_type }} ({{ task.repeat_i }} раз)</p>
-                <p><strong>Геопозиция:</strong> {{ task.geop.lat }}, {{ task.geop.lon }}</p>
-                <a href="{% url 'edit_task' task.id %}">
-                    <button>Редактировать</button>
-                </a>
-                <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">Удалить</button>
-                </form>
-            </li>
+        <li class="task-item">
+            <h3>{{ task.title }}</h3>
+            <p>{{ task.description }}</p>
+            <p><strong>Начало:</strong> {{ task.date_start }}</p>
+            <p><strong>Окончание:</strong> {{ task.deadline }}</p>
+            <p><strong>Повторение:</strong> {{ task.repeat_type }} ({{ task.repeat_i }} раз)</p>
+            <p><strong>Геопозиция:</strong> {{ task.geop.lat }}, {{ task.geop.lon }}</p>
+            <a href="{% url 'edit_task' task.id %}">
+                <button>Редактировать</button>
+            </a>
+            <form method="POST" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Удалить</button>
+            </form>
+        </li>
         {% endfor %}
     </ul>
 
@@ -81,7 +194,7 @@
         var tasks = JSON.parse(document.getElementById('tasks-data').textContent);
 
         // Добавляем маркеры на карту
-        tasks.forEach(function(task) {
+        tasks.forEach(function (task) {
             if (task.geop.lat && task.geop.lon) {
                 L.marker([task.geop.lon, task.geop.lat])
                     .addTo(map)
@@ -90,19 +203,6 @@
         });
     </script>
 
-<h1>Список задач</h1>
-<ul>
-    {% for task in tasks %}
-    <li>
-        <h3>{{ task.title }}</h3>
-        <p>{{ task.description }}</p>
-        <p>Начало: {{ task.date_start }}</p>
-        <p>Окончание: {{ task.deadline }}</p>
-        <p>Тип повторения: {{ task.repeat_type }}</p>
-        <p>Количество повторений: {{ task.repeat_i }}</p>
-        <p>Геопозиция: <span id={{task.id}} class="geop">{{ task.geop.lat }}, {{ task.geop.lon }}</span></p>
-    </li>
-    {% endfor %}
-</ul>
 </body>
+
 </html>

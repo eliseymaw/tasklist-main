@@ -5,15 +5,15 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class RegisterForm(UserCreationForm):
     username = forms.CharField(
-        label="Логин", 
+        label="Логин",
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     password1 = forms.CharField(
-        label="Пароль", 
+        label="Пароль",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
     password2 = forms.CharField(
-        label="Подтвердите пароль", 
+        label="Подтвердите пароль",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
 
@@ -23,19 +23,19 @@ class RegisterForm(UserCreationForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Логин", 
+        label="Логин",
         widget=forms.TextInput(attrs={'class': 'form-control'})
     )
     password = forms.CharField(
-        label="Пароль", 
+        label="Пароль",
         widget=forms.PasswordInput(attrs={'class': 'form-control'})
     )
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'date_start', 'deadline', 'repeat_type', 'repeat_i']
-    
+        fields = ['title', 'description', 'date_start', 'deadline', 'repeat_type', 'repeat_i', 'geop']
+
     title = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         label="Название"
@@ -59,60 +59,46 @@ class TaskForm(forms.ModelForm):
     )
     repeat_i = forms.IntegerField(
         widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        label="Количество повторений"
+        label="Количество повторов"
+    )
+    geop = forms.ModelChoiceField(
+        queryset=Geoposition.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label="Геопозиция"
     )
 
 class GeopositionForm(forms.ModelForm):
     class Meta:
         model = Geoposition
         fields = ['lat', 'lon']
-    
+
     lat = forms.DecimalField(
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),  # Убраны ограничения
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
         label="Широта"
     )
     lon = forms.DecimalField(
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),  # Убраны ограничения
+        widget=forms.NumberInput(attrs={'class': 'form-control'}),
         label="Долгота"
-    )
-
-    repeat_type = forms.ChoiceField(
-        choices=Task.PERIODS,
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label="Тип повторения"
-    )
-    
-    geop = forms.ModelChoiceField(
-        queryset=Geoposition.objects.all(), 
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label="Выберите геопозицию"
     )
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'location', 'avatar', 'status']
-    
+        fields = ['bio', 'location', 'avatar']
+
     bio = forms.CharField(
         widget=forms.Textarea(attrs={'class': 'form-control'}),
-        label="О себе", 
-        required=False  # Поле биографии необязательно
+        label="О себе",
+        required=False
     )
     location = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
-        label="Местоположение", 
-        required=False  # Поле местоположения необязательно
+        label="Местоположение",
+        required=False
     )
     avatar = forms.ImageField(
         widget=forms.ClearableFileInput(attrs={'class': 'form-control'}),
-        label="Аватар", 
-        required=False  # Поле аватара необязательно
-    )
-    status = forms.CharField(
-        max_length=100,
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        label="Статус", 
-        required=True  # Статус обязательное поле
+        label="Аватар",
+        required=False
     )

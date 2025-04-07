@@ -47,8 +47,28 @@ def base(request):
 @login_required
 def create_task(request):
     if request.method == 'POST':
-        form = TaskForm(request.POST)
-        geop_form = GeopositionForm(request.POST)
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        date_start = request.POST.get('date_start')
+        deadline = request.POST.get('deadline')
+        repeat_type = request.POST.get('repeat_type')
+        repeat_i = request.POST.get('repeat_i')
+
+        task_form_data = {
+            'title': title,
+            'description': description,
+            'date_start': date_start,
+            'deadline': deadline,
+            'repeat_type': repeat_type,
+            'repeat_i': repeat_i,
+        }
+
+        form = TaskForm(task_form_data)
+
+        lat = float(request.POST.get('lat'))
+        lon = float(request.POST.get('lon'))
+        geop_form = GeopositionForm({'lat': lat, 'lon': lon})
+
         print("POST данные:", request.POST)
 
         if form.is_valid() and geop_form.is_valid():
@@ -60,10 +80,11 @@ def create_task(request):
 
             print(f"Создана задача: {task.title}, ID: {task.id}, Владелец: {task.owner}")
 
-            return redirect('task_list') 
+            return redirect('task_list_main')
 
         else:
-            print("Ошибки формы:", form.errors, geop_form.errors)
+            print("Ошибки формы:", form.errors)
+            print("Ошибки формы геопозиции:", geop_form.errors)
 
     else:
         form = TaskForm()
