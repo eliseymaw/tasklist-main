@@ -160,7 +160,7 @@ def edit_profile(request):
             return redirect('user_profile', username=request.user.username)
     else:
         form = ProfileForm(instance=request.user.profile)
-    
+
     return render(request, 'edit_profile.html', {'form': form})
 
 # Детали задачи (JSON)
@@ -192,7 +192,7 @@ def edit_task(request, task_id):
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            return redirect('task_list')
+            return redirect('task_list_main')
     else:
         form = TaskForm(instance=task)
 

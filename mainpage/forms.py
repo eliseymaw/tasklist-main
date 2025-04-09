@@ -88,12 +88,18 @@ class ProfileForm(forms.ModelForm):
         fields = ['bio', 'location', 'avatar']
 
     bio = forms.CharField(
-        widget=forms.Textarea(attrs={'class': 'form-control'}),
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Напишите немного о себе...'
+        }),
         label="О себе",
         required=False
     )
     location = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ваше местоположение'
+        }),
         label="Местоположение",
         required=False
     )

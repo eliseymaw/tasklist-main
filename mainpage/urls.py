@@ -12,7 +12,6 @@ urlpatterns = [
     path('base/', views.base, name='base'),
     path('profile/<str:username>/', views.user_profile, name='user_profile'),
     path('profile/edit/<int:user_id>/', views.edit_profile, name='edit_profile'),
-    path("register/", register_view, name="register"),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
     path('tasks/<int:task_id>/', views.task_detail, name='task_detail'),
