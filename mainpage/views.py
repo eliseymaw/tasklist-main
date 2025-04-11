@@ -192,7 +192,7 @@ def edit_task(request, task_id):
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
             form.save()
-            return redirect('task_list_main')
+            return redirect('base')
     else:
         form = TaskForm(instance=task)
 
